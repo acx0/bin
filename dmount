@@ -1,0 +1,52 @@
+#!/bin/bash
+# quick and dirty script to mount USB storage devices (since nothing else seems
+# to work for me)
+# note: guaranteed to be riddled with bugs; use at your own risk
+
+MOUNT_OPTS="rw,nosuid,nodev,uhelper=udisks,uid=1000,gid=1000,dmask=0077,fmask=0177"
+
+isValid() {
+    for i in "${VALID[@]}"; do
+        if [[ $i == $1 ]]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+TABLE=$(sudo fdisk -l | grep "/dev/[hs]d" | grep -v "Extended")
+echo -e "Available partitions:\n\n$TABLE"
+
+echo -e "\nSelect partition to mount:\n"
+PARTITIONS=$(sudo fdisk -l | grep "^/dev/[hs]d" | grep -v "Extended" | cut -d " " -f 1 | tr "\n" " ")
+
+COUNT=0
+declare -a VALID
+
+for i in $PARTITIONS; do
+    ((COUNT++))
+    if [[ $(mount | grep $i) ]]; then
+        echo -e "-)\t$i (mounted)"
+    else
+        echo -e "$COUNT)\t$i"
+        VALID=("${VALID[@]}" "$COUNT")
+    fi
+done
+echo -e "\nq)\tquit"
+
+echo -ne "\npartition to mount: "
+read MOUNT
+
+if [[ $MOUNT == "q" ]]; then
+    exit 0
+fi
+
+isValid $MOUNT
+if [[ $MOUNT -le $COUNT && $? == 0 ]]; then
+    FOLDER=$(echo "$PARTITIONS" | cut -d " " -f $MOUNT | grep -o "[hs]d.*")
+
+    sudo mkdir /media/$FOLDER && sudo mount -o $MOUNT_OPTS /dev/$FOLDER /media/$FOLDER
+else
+    echo "$(basename $0): error: invalid selection" > /dev/stderr
+    exit 1
+fi

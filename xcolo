@@ -1,0 +1,21 @@
+#!/bin/bash
+# changes Xresources colourscheme and saves new value
+
+START=$(($(grep -n "#include.*Xcolours/basic" ~/.Xresources | cut -d ":" -f 1) + 1))
+
+if [[ $# -eq 0 ]]; then
+    sed -n "$START,$ p" ~/.Xresources | grep -o "Xcolours.*[^\"]" | grep -o "/[^/]\+$" | tr -d "/"
+elif [[ -e ~/.Xcolours/$1 || -e $1 ]]; then
+    COLOUR=$(basename $1)
+
+    if [[ $START -eq 1 ]]; then
+        echo >&2 "$(basename $0): colourscheme not set: '#include' not found"
+        exit 1
+    fi
+
+    sed --follow-symlinks -i "$START,$ s/Xcolours.*[^\"]/Xcolours\/$COLOUR/" ~/.Xresources
+    xrdb -load ~/.Xresources
+else
+    echo >&2 "$(basename $0): colourscheme does not exist"
+    exit 1
+fi

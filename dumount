@@ -1,0 +1,61 @@
+#!/bin/bash
+# quick and dirty script to unmount USB storage devices (since nothing else
+# seems to work for me)
+# note: guaranteed to be riddled with bugs; use at your own risk
+
+# partitions to restrict from being unmounted
+RESTRICTED="/dev/sda1 /dev/sda2 /dev/sda3 /dev/sda4 /dev/sda5"
+
+isValid() {
+    for i in "${VALID[@]}"; do
+        if [[ $i == $1 ]]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+TABLE=$(sudo fdisk -l | grep "/dev/[hs]d" | grep -v "Extended")
+echo -e "Available partitions:\n\n$TABLE"
+
+echo -e "\nSelect partition to unmount:\n"
+PARTITIONS=$(sudo fdisk -l | grep "^/dev/[hs]d" | grep -v "Extended" | cut -d " " -f 1 | tr "\n" " ")
+
+COUNT=0
+declare -a VALID
+
+for i in $PARTITIONS; do
+    ((COUNT++))
+    if [[ $(grep "$i" /etc/fstab) ]]; then
+        echo -e "-)\t$i (system)"
+    elif [[ $(echo $RESTRICTED | grep "$i") ]]; then
+        echo -e "-)\t$i (restricted)"
+    elif [[ ! $(mount | grep "$i") ]]; then
+        echo -e "-)\t$i (not mounted)"
+    else
+        echo -e "$COUNT)\t$i"
+        VALID=("${VALID[@]}" "$COUNT")
+    fi
+done
+echo -e "\nq)\tquit"
+
+echo -ne "\nEnter number of the partition to unmount: "
+read UNMOUNT
+
+if [ "$UNMOUNT" == "q" ]; then
+    exit 0
+fi
+
+isValid $UNMOUNT
+if [[ "$UNMOUNT" -le "$COUNT" && $? == 0 ]]; then
+    FOLDER=$(echo "$PARTITIONS" | cut -d " " -f $UNMOUNT | grep -o "sd.*")
+    #if [ "$(echo $RESTRICTED | grep "$FOLDER")" -o "$(grep "$FOLDER" /etc/fstab)" ]; then
+        #echo "$0: error: system or restricted mount point" > /dev/stderr
+        #exit 1
+    #fi
+
+    sudo umount /dev/$FOLDER && sudo rmdir /media/$FOLDER
+else
+    echo "$(basename $0): error: invalid selection" > /dev/stderr
+    exit 1
+fi

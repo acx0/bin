@@ -1,0 +1,13 @@
+#!/bin/bash
+# toggle SESSION variable in ~/.xsession to change WM on next login
+
+if [[ $(grep '=awesome' ~/etc/xsession) ]]; then
+    sed --follow-symlinks -i 's/=awesome/=dwm/' ~/.xsession
+    echo "WM switched to 'dwm'"
+elif [[ $(grep '=dwm' ~/etc/xsession) ]]; then
+    sed --follow-symlinks -i 's/=dwm/=awesome/' ~/.xsession
+    echo "WM switched to 'awesome'"
+else
+    echo >&2 "$(basename $0): WM not set"
+    exit 1
+fi
