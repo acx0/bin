@@ -39,7 +39,7 @@ for i in $PARTITIONS; do
 done
 echo -e "\nq)\tquit"
 
-echo -ne "\nEnter number of the partition to unmount: "
+echo -ne "\npartition to unmount: "
 read UNMOUNT
 
 if [ "$UNMOUNT" == "q" ]; then
@@ -49,10 +49,6 @@ fi
 isValid $UNMOUNT
 if [[ "$UNMOUNT" -le "$COUNT" && $? == 0 ]]; then
     FOLDER=$(echo "$PARTITIONS" | cut -d " " -f $UNMOUNT | grep -o "sd.*")
-    #if [ "$(echo $RESTRICTED | grep "$FOLDER")" -o "$(grep "$FOLDER" /etc/fstab)" ]; then
-        #echo "$0: error: system or restricted mount point" > /dev/stderr
-        #exit 1
-    #fi
 
     sudo umount /dev/$FOLDER && sudo rmdir /media/$FOLDER
 else
