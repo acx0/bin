@@ -1,0 +1,12 @@
+#!/bin/bash
+# view summary of bandwidth used on all devices since system startup
+
+for dev in /sys/class/net/*; do
+    RX=$(( ($(< $dev/statistics/rx_bytes)) / (1024 ** 2) ))
+    TX=$(( ($(< $dev/statistics/tx_bytes)) / (1024 ** 2) ))
+    #RX=$(ifconfig $(basename $dev) | grep "RX bytes:" | awk '{print $2}' | cut -d ":" -f 2)
+    #TX=$(ifconfig $(basename $dev) | grep "RX bytes:" | awk '{print $6}' | cut -d ":" -f 2)
+
+    TOTAL=$(( $RX + $TX ))
+    echo -e "$(basename $dev):\tRX: $RX MB\tTX: $TX MB\tTOTAL: $TOTAL MB"
+done
