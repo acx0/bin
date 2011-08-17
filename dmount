@@ -1,6 +1,5 @@
 #!/bin/bash
-# quick and dirty script to mount USB storage devices (since nothing else seems
-# to work for me)
+# quick and dirty script to mount USB storage devices (since nothing else seems to work for me)
 # note: guaranteed to be riddled with bugs; use at your own risk
 
 MOUNT_OPTS="rw,nosuid,nodev,uhelper=udisks,uid=1000,gid=1000,dmask=0077,fmask=0177"

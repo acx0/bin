@@ -1,6 +1,5 @@
 #!/bin/bash
-# quick and dirty script to unmount USB storage devices (since nothing else
-# seems to work for me)
+# quick and dirty script to unmount USB storage devices (since nothing else seems to work for me)
 # note: guaranteed to be riddled with bugs; use at your own risk
 
 # partitions to restrict from being unmounted
