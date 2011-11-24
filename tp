@@ -1,0 +1,14 @@
+#!/bin/bash
+
+if [[ $1 == "on" ]]; then
+    synclient touchpadoff=0
+elif [[ $1 == "off" ]]; then
+    synclient touchpadoff=1
+    xdotool mousemove $(xrandr | grep '*' | awk '{ print $1 }' | tr 'x' ' ')
+else
+    if [[ $(synclient | grep "TouchpadOff.*0") ]]; then
+        echo "touchpad is on"
+    else
+        echo "touchpad is off"
+    fi
+fi
