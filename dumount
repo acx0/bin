@@ -3,11 +3,11 @@
 # note: guaranteed to be riddled with bugs; use at your own risk
 
 # partitions to restrict from being unmounted (defined in RESTRICTED_DEF file)
-# example: RESTRICTED="/dev/sda5 /dev/sdb2"
+# example: DU_RESTRICTED="/dev/sda5 /dev/sdb2"
 RESTRICTED_DEF=$HOME/bin/.dmount-restricted
 
 if [[ ! -e $RESTRICTED_DEF ]]; then
-    echo 'RESTRICTED=""' > $RESTRICTED_DEF
+    echo -e 'D_RESTRICTED=""\nDU_RESTRICTED=""' > $RESTRICTED_DEF
 fi
 source $RESTRICTED_DEF
 
@@ -33,7 +33,7 @@ for i in $PARTITIONS; do
     ((COUNT++))
     if [[ $(grep "$i" /etc/fstab) ]]; then
         echo -e "-)\t$i (system)"
-    elif [[ $(echo $RESTRICTED | grep "$i") ]]; then
+    elif [[ $(echo $DU_RESTRICTED | grep "$i") ]]; then
         echo -e "-)\t$i (restricted)"
     elif [[ ! $(mount | grep "$i") ]]; then
         echo -e "-)\t$i (not mounted)"

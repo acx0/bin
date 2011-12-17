@@ -2,7 +2,16 @@
 # quick and dirty script to mount USB storage devices (since nothing else seems to work for me)
 # note: guaranteed to be riddled with bugs; use at your own risk
 
-MOUNT_OPTS="rw,nosuid,nodev,uhelper=udisks,uid=1000,gid=1000,dmask=0077,fmask=0177"
+MOUNT_OPTS="rw,nosuid,nodev,uid=1000,gid=1000,dmask=0022,fmask=0133"
+
+# partitions to restrict from being mounted (defined in RESTRICTED_DEF file)
+# example: D_RESTRICTED="/dev/sda5 /dev/sdb2"
+RESTRICTED_DEF=$HOME/bin/.dmount-restricted
+
+if [[ ! -e $RESTRICTED_DEF ]]; then
+    echo -e 'D_RESTRICTED=""\nDU_RESTRICTED=""' > $RESTRICTED_DEF
+fi
+source $RESTRICTED_DEF
 
 isValid() {
     for i in "${VALID[@]}"; do
@@ -24,7 +33,11 @@ declare -a VALID
 
 for i in $PARTITIONS; do
     ((COUNT++))
-    if [[ $(mount | grep $i) ]]; then
+    if [[ $(grep "$i" /etc/fstab) ]]; then
+        echo -e "-)\t$i (system)"
+    elif [[ $(echo $D_RESTRICTED | grep "$i") ]]; then
+        echo -e "-)\t$i (restricted)"
+    elif [[ $(mount | grep $i) ]]; then
         echo -e "-)\t$i (mounted)"
     else
         echo -e "$COUNT)\t$i"
