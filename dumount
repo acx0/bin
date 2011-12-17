@@ -2,8 +2,14 @@
 # quick and dirty script to unmount USB storage devices (since nothing else seems to work for me)
 # note: guaranteed to be riddled with bugs; use at your own risk
 
-# partitions to restrict from being unmounted
-RESTRICTED="/dev/sda1 /dev/sda2 /dev/sda3 /dev/sda4 /dev/sda5"
+# partitions to restrict from being unmounted (defined in RESTRICTED_DEF file)
+# example: RESTRICTED="/dev/sda5 /dev/sdb2"
+RESTRICTED_DEF=$HOME/bin/.dmount-restricted
+
+if [[ ! -e $RESTRICTED_DEF ]]; then
+    echo 'RESTRICTED=""' > $RESTRICTED_DEF
+fi
+source $RESTRICTED_DEF
 
 isValid() {
     for i in "${VALID[@]}"; do
