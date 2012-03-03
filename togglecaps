@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if [[ -z $(xmodmap -pke | grep "Caps_Lock") ]]; then
+    xmodmap -e "keycode 66 = Caps_Lock"
+    echo "Caps Lock key is Caps Lock"
+else
+    xmodmap -e "remove Lock = Caps_Lock"
+    xmodmap -e "keysym Caps_Lock = Control_L"
+    xmodmap -e "add Control = Control_L"
+    echo "Caps Lock key is Control_L"
+fi
