@@ -26,7 +26,7 @@ if [[ -z $1 ]]; then
 fi
 
 if [[ -z $(tmux list-sessions 2> /dev/null | grep "$1") ]]; then
-    tmux new-session -s $1 $1
+    tmux new-session -s $1 "$*"
 else
     tmux attach-session $OPTS -t $1
 fi
