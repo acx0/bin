@@ -1,6 +1,2 @@
 *.swp
-update
 .dmount-restricted
-push
-pull
-sync-pkgs
