@@ -1,0 +1,13 @@
+#!/bin/bash
+# temporary fix for wireless firmware bug that caps dl+ul speed to ~100kB/s after some arbitrary period of usage
+
+if [[ -n $(lsmod | grep rtl8187) ]]; then
+    WIFI=rtl8187
+elif [[ -n $(lsmod | grep iwl3945) ]]; then
+    WIFI=iwl3945
+else
+    exit 1;
+fi
+
+sudo modprobe -r $WIFI
+sudo modprobe $WIFI
