@@ -9,5 +9,4 @@ else
     exit 1;
 fi
 
-sudo modprobe -r $WIFI
-sudo modprobe $WIFI
+sudo modprobe -r $WIFI && sudo modprobe $WIFI
