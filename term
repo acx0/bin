@@ -1,0 +1,7 @@
+#!/bin/bash
+
+if [[ -n $(which urxvt) ]]; then
+    urxvt &
+elif [[ -n $(which xterm) ]]; then
+    xterm &
+fi
