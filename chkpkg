@@ -1,0 +1,83 @@
+#!/bin/bash
+# display summary of package installation states and output list of missing packages
+# useful for checking if build-deps are satisfied, e.g.:
+#   chkpkg <build dep list>
+#   chkpkg $(list-bdep <pkg>)
+# TODO:
+#   - what if one of providing package(s) for virtual package is also virtual?
+
+red=$(tput bold; tput setaf 1)
+green=$(tput bold; tput setaf 2)
+blue=$(tput bold; tput setaf 6)
+grey=$(tput bold; tput setaf 7)
+reset=$(tput sgr0)
+
+install_list=()
+virt_pkg_list=()    # list containing one providing package for each virtual package
+index=0
+v_index=0
+
+get_package_state()
+{
+    pkg_info="$(apt-cache policy $1)"
+
+    if [[ -n $(echo "$pkg_info" | tail -n 1 | grep "Version table:") ]]; then
+        echo "       ${blue}virtual${reset}"
+    elif [[ -n $(echo "$pkg_info" | grep "Installed: (none)") ]]; then
+        echo "       ${red}missing${reset}"
+    elif [[ -z $pkg_info ]]; then
+        echo "       ${grey}invalid${reset}"
+    else
+        echo "     ${green}installed${reset}"
+    fi
+}
+
+for pkg in $*; do
+    pkg_state=$(get_package_state "$pkg")
+
+    echo -e "$pkg_state\t$pkg"
+    if [[ -n $(echo "$pkg_state" | grep "virtual") ]]; then
+        pkg_details=$(apt-cache showpkg "$pkg")
+        line=$(($(echo "$pkg_details" | grep -n "^Reverse Provides: $" | cut -d ":" -f 1) + 1))
+        suggest_pkg=""
+        satisfied=0
+
+        # uniq to remove duplicate entries from other release branches
+        pkg_provides=$(echo "$pkg_details" | sed -n "$line,$ p" | cut -d " " -f 1 | uniq)
+
+        for prov in $pkg_provides; do
+            prov_pkg_state=$(get_package_state "$prov")
+            echo -e "$prov_pkg_state\t   $prov"
+
+            # suggest first providing package in list
+            [[ -z $suggest_pkg ]] && suggest_pkg="$prov"
+            [[ -n $(echo "$prov_pkg_state" | grep "installed") ]] && satisfied=1
+        done
+
+        # only suggest providing package if virtual dependency not satisfied
+        # note: some virtual packages list no provides (old entries?)
+        if [[ $satisfied == 0 && -n $suggest_pkg ]]; then
+            virt_pkg_list[$v_index]="$suggest_pkg"
+            v_index=$((v_index + 1))
+        fi
+    elif [[ -n $(echo "$pkg_state" | grep "missing") ]]; then
+        install_list[$index]="$pkg"
+        index=$((index + 1))
+    fi
+done
+
+if [[ ${#install_list[@]} > 0 ]]; then
+    echo -en "\n# sudo aptitude install "
+    for pkg in "${install_list[@]}"; do
+        echo -n "$pkg "
+    done
+    echo ""
+fi
+
+if [[ ${#virt_pkg_list[@]} > 0 ]]; then
+    echo -n "# sudo aptitude install "
+    for pkg in "${virt_pkg_list[@]}"; do
+        echo -n "$pkg "
+    done
+    echo ""
+fi
