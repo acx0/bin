@@ -1,0 +1,23 @@
+#!/bin/bash
+# open aptitude documentation in browser
+
+PAGE="index.html"
+
+while getopts s OPT; do
+    case "$OPT" in
+        s)
+            # search patterns
+            PAGE="ch02s04s05.html"
+            ;;
+        ?)
+            exit 1
+            ;;
+    esac
+done
+
+if [[ -d /usr/share/doc/aptitude/html ]]; then
+    $BROWSER /usr/share/doc/aptitude/html/en/$PAGE > /dev/null 2>&1 &
+else
+    echo >&2 "error: \`aptitude-doc-en' not installed"
+    exit 1
+fi

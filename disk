@@ -1,0 +1,6 @@
+#!/bin/bash
+# view how much data is being/waiting to be written to disk
+# https://github.com/torvalds/linux/blob/master/Documentation/filesystems/proc.txt
+#   - see "meminfo"
+
+watch -n 1 'grep "Dirty\|Writeback"' /proc/meminfo
