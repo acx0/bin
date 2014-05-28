@@ -1,0 +1,16 @@
+#!/bin/bash
+
+echo "arch: $(uname -m)"
+echo -n "proc: "
+
+# long, transparent, or real mode
+if [[ $(grep "\<lm\>" /proc/cpuinfo) ]]; then
+    echo "64-bit"
+elif [[ $(grep "\<tm\>" /proc/cpuinfo) ]]; then
+    echo "32-bit"
+elif [[ $(grep "\<rm\>" /proc/cpuinfo) ]]; then
+    # for completeness...
+    echo "16-bit"
+fi
+
+echo "LONG_BIT: $(getconf LONG_BIT)"
