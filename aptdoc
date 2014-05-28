@@ -1,6 +1,10 @@
 #!/bin/bash
 # open aptitude documentation in browser
 
+# useful pages:
+#   ch02s02s02.html - package state information
+#   ch02s04s01.html - customize package display output
+
 PAGE="index.html"
 
 while getopts s OPT; do
