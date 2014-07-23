@@ -1,15 +1,39 @@
 #!/bin/bash
 
+if [[ -n $(which xinput) ]]; then
+    use_xinput=1
+    tp_id=$(xinput --list --long | grep -io "touchpad.*id=[0-9]\+" | grep -o "[0-9]\+")
+fi
+
 if [[ $1 == "on" ]]; then
-    synclient touchpadoff=0
-elif [[ $1 == "off" || $1 == "move" ]]; then
-    [[ $1 == "off" ]] && synclient touchpadoff=1
-    # move cursor to bottom right corner of screen
-    xdotool mousemove $(xrandr | grep '*' | awk '{ print $1 }' | tr 'x' ' ')
-else
-    if [[ $(synclient | grep "TouchpadOff.*0") ]]; then
-        echo "touchpad is on"
+    if [[ -n $use_xinput ]]; then
+        xinput --enable "$tp_id"
     else
-        echo "touchpad is off"
+        synclient touchpadoff=0
+    fi
+elif [[ $1 == "off" || $1 == "move" ]]; then
+    if [[ $1 == "off" ]]; then
+        if [[ -n $use_xinput ]]; then
+            xinput --disable "$tp_id"
+        else
+            synclient touchpadoff=1
+        fi
+    fi
+
+    # move cursor to bottom right corner of screen
+    xdotool mousemove $(xrandr | grep '*' | head -n 1 | awk '{ print $1 }' | tr 'x' ' ')
+else
+    if [[ -n $use_xinput ]]; then
+        if [[ $(xinput --list "$tp_id" | grep 'disabled') ]]; then
+            echo "touchpad is off"
+        else
+            echo "touchpad is on"
+        fi
+    else
+        if [[ $(synclient | grep "TouchpadOff.*0") ]]; then
+            echo "touchpad is on"
+        else
+            echo "touchpad is off"
+        fi
     fi
 fi
