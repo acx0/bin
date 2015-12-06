@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if mount | grep "/dev/mapper/data" > /dev/null; then
+    echo 2>&1 "data already mounted"
+    exit 1
+fi
+
+sudo cryptdisks_start data && sudo mount /media/data

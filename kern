@@ -1,0 +1,11 @@
+#!/bin/bash
+
+package=$(apt-cache show linux-image-amd64 | grep 'Depends:' | awk '{print $2}')
+current=$(uname -v | awk '{print $4}')
+updated=$(apt-cache policy $package | grep '\*\*\*' | awk '{print $2}')
+
+if [[ $current != $updated ]]; then
+    echo "kernel restart required"
+    echo "  current: $current"
+    echo "  updated: $updated"
+fi
