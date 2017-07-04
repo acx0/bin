@@ -1,11 +1,11 @@
 #!/bin/bash
 
-package=$(apt-cache show linux-image-amd64 | grep 'Depends:' | awk '{print $2}')
-current=$(uname -v | awk '{print $4}')
-updated=$(apt-cache policy $package | grep '\*\*\*' | awk '{print $2}')
+# example debian kernel version string: '4.9.30-2+deb9u2'
+package=$(apt-cache show linux-image-amd64 | awk '/Depends:/ {print $2}')
+current=$(uname -v | grep -Po "\d+\.[\d\.\-\+a-z]+")
+updated=$(apt-cache policy $package | awk '/\*\*\*/ {print $2}')
 
-if [[ $current != $updated ]]; then
-    echo "kernel restart required"
-    echo "  current: $current"
-    echo "  updated: $updated"
-fi
+str=$([[ $current == $updated ]] && echo "not " || echo "")
+echo "kernel restart ${str}required"
+echo "  current: $current"
+echo "  updated: $updated"
