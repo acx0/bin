@@ -1,11 +1,13 @@
 #!/bin/bash
 
 # example debian kernel version string: '4.9.30-2+deb9u2'
-package=$(apt-cache show linux-image-amd64 | awk '/Depends:/ {print $2}')
 current=$(uname -v | grep -Po "\d+\.[\d\.\-\+a-z]+")
+
+# output can contain multiple packages, exit after first match
+package=$(apt-cache show linux-image-amd64 | awk '/Depends:/ {print $2; exit}')
 updated=$(apt-cache policy $package | awk '/\*\*\*/ {print $2}')
 
 str=$([[ $current == $updated ]] && echo "not " || echo "")
 echo "kernel restart ${str}required"
 echo "  current: $current"
-echo "  updated: $updated"
+[[ $current != $updated ]] && echo "  updated: $updated"
