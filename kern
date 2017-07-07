@@ -3,9 +3,11 @@
 # example debian kernel version string: '4.9.30-2+deb9u2'
 current=$(uname -v | grep -Po "\d+\.[\d\.\-\+a-z]+")
 
-# output can contain multiple packages, exit after first match
-package=$(apt-cache show linux-image-amd64 | awk '/Depends:/ {print $2; exit}')
-updated=$(apt-cache policy $package | awk '/\*\*\*/ {print $2}')
+# output can contain multiple packages, match against installed package
+for package in $(apt-cache show linux-image-amd64 | awk '/Depends:/ {print $2}'); do
+    updated=$(apt-cache policy $package | awk '/\*\*\*/ {print $2}')
+    [[ -n $updated ]] && break
+done
 
 str=$([[ $current == $updated ]] && echo "not " || echo "")
 echo "kernel restart ${str}required"
