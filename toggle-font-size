@@ -1,0 +1,24 @@
+#!/bin/bash
+# toggle between small and large terminus font in ~/.Xresources
+
+resource_file="$HOME/.Xresources"
+terminus_small="-*-terminus-medium-*-*-*-*-*-*-*-*-*-*-*"
+terminus_large="-*-terminus-medium-*-*-*-14-*-*-*-*-*-*-*"
+
+# need to escape '*' otherwise interpreted as regex modifier
+terminus_small="${terminus_small//\*/\\*}"
+terminus_large="${terminus_large//\*/\\*}"
+
+if grep -q -- "$terminus_small" "$resource_file"; then
+    echo "increasing font size"
+    sed --follow-symlinks -i "s/$terminus_small/$terminus_large/" "$resource_file"
+elif grep -q -- "$terminus_large" "$resource_file"; then
+    echo "decreasing font size"
+    sed --follow-symlinks -i "s/$terminus_large/$terminus_small/" "$resource_file"
+else
+    echo "terminus font config not found"
+fi
+
+if [[ $1 == "-f" ]]; then
+    xrdb -load "$resource_file"
+fi
