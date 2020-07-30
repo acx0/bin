@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+# find which debian packages provide a given binary's dynamic dependencies
+# note: see `man ldd` -> `/Security` disclaimer
+
+bin="$1"
+if [[ -z $bin ]]; then
+    echo >&2 "usage: $(basename $0) <binary>"
+    exit 1
+fi
+
+if ! command -v apt-file >/dev/null; then
+    echo >&2 "error: apt-file not found"
+    exit 1
+fi
+
+indent() {
+    sed 's/^/    /'
+}
+
+# `apt-file --regexp` is very slow...
+filter-exact-so-name() {
+    grep "${1}$"
+}
+
+filter-out-libc6-cross() {
+    grep -v \
+        -e "libc6.*-cross" \
+        -e "libc6-\(i386\|x32\)"
+}
+
+filter-out-libstdcpp6-cross() {
+    grep -v \
+        -e "libstdc++6.*-cross" \
+        -e "libstdc++6.*-dbg" \
+        -e "libx32stdc++6" \
+        -e "libn32stdc++6" \
+        -e "lib32stdc++6" \
+        -e "lib64stdc++6"
+}
+
+filter-out-libgcc-cross() {
+    grep -v \
+        -e "libgcc-s1-.*-cross" \
+        -e "libx32gcc-s1" \
+        -e "libn32gcc-s1" \
+        -e "lib32gcc-s1" \
+        -e "lib64gcc-s1" \
+        -e "lib32gcc1-" \
+        -e "lib64gcc1-" \
+        -e "libgcc1-.*-cross" \
+        -e "libx32gcc1-.*-cross" \
+        -e "libn32gcc1-.*-cross"
+}
+
+filter-out-nvidia() {
+    grep -v \
+        -e "libgl1-nvidia" \
+        -e "libegl1-nvidia" \
+        -e "primus-libs" \
+        -e "nsight-compute" \
+        -e "nsight-systems"
+}
+
+filter-out-misc() {
+    grep -v \
+        -e "nxagent" \
+        -e "dbus-tests" \
+        -e "lib32z1" \
+        -e "libzadc4" \
+        -e "libelogind0" \
+        -e "libjack0" \
+        -e "libqt5gui5-gles"
+}
+
+for so in $(ldd "$bin" | awk '{print $1}'); do
+    echo "# $so"
+    apt-file find "$so" \
+        | filter-exact-so-name "$so" \
+        | filter-out-libc6-cross \
+        | filter-out-libstdcpp6-cross \
+        | filter-out-libgcc-cross \
+        | filter-out-nvidia \
+        | filter-out-misc \
+        | cut -d: -f1 \
+        | uniq \
+        | indent
+done
