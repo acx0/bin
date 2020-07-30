@@ -1,0 +1,16 @@
+#!/bin/bash
+
+if ! command -v xinput >/dev/null; then
+    echo >&2 "error: xinput not found"
+    exit 1
+fi
+
+tp_id=$(xinput --list --long | grep -io "ibm trackpoint\s\+id=[0-9]\+" | cut -d= -f2)
+if xinput --list-props "$tp_id" | grep -i "device enabled.*:.*1" >/dev/null; then
+    xinput --disable "$tp_id"
+
+    # move cursor to bottom right corner of screen
+    xdotool mousemove $(xrandr | grep '*' | head -n 1 | awk '{ print $1 }' | tr 'x' ' ')
+else
+    xinput --enable "$tp_id"
+fi
