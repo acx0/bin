@@ -1,4 +1,4 @@
 #!/bin/bash
 
-xscreensaver-command -lock
+i3lock --color 1A1A1A --show-failed-attempts
 xset dpms force off    # turn off display
