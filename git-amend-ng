@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+# usage: stage the changes to be amended into $sha_to_fixup, then invoke
+# note: can be invoked as `git amend-ng`
+
+if [[ $# != 1 ]]; then
+    echo >&2 "error: provide sha to amend"
+    exit 1
+fi
+
+if ! git diff-files --quiet; then
+    echo >&2 "error: rebase will complain about unstaged changes; stage or stash with \`git stash -k\`"
+    exit 1
+fi
+
+sha_to_fixup="$1"
+git commit --fixup "$sha_to_fixup" && GIT_EDITOR="true" git rebase --autosquash --interactive "$sha_to_fixup"^
