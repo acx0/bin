@@ -13,5 +13,5 @@ str=$([[ $current == $updated ]] && echo "not " || echo "")
 echo "kernel restart ${str}required"
 echo "  current: $current"
 if [[ $current != $updated ]]; then
-    "  updated: $updated"
+    echo "  updated: $updated"
 fi
