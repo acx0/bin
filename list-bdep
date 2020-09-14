@@ -3,6 +3,8 @@
 #   sudo aptitude markauto $(list-bdep <pkg>)
 # useful for removing build dependencies installed by 'aptitude build-dep'
 
-DEPS=$(apt-cache showsrc "$1" | grep "Build-Depends" | perl -p -e 's/(?:[\[(].+?[\])]|Build-Depends:|Build-Depends-Indep:|,|\|)//g' \
+DEPS=$(apt-cache showsrc "$1" \
+    | grep "^Build-Depends:" \
+    | perl -pe 's/(?:[\[(].+?[\])]|Build-Depends:|,|\||<.+?>)//g' \
     | tr "[:space:]" "\n" | grep -v "^$" | sort -u | tr "\n" " ")
 [[ -n $DEPS ]] && echo $DEPS
