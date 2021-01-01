@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+# save current epoch timestamp into variable, requires bash 4.2
+printf -v prev_ts_s '%(%s)T' -1
+
+while read -s; do
+    printf -v curr_ts_s '%(%s)T' -1
+    diff=$(($curr_ts_s - $prev_ts_s))
+    echo "$((diff / 60)) min $((diff % 60)) s"
+    prev_ts_s=$curr_ts_s
+done
