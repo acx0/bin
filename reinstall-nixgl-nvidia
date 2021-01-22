@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# bump in debian `nvidia-driver` package version requires reinstallation of nixGL
+set -e
+
+src_root="$HOME/var/build"
+repo="https://github.com/guibou/nixGL"
+
+mkdir -p "$src_root"
+cd "$src_root"
+[[ -d nixGL ]] || git clone "$repo"
+cd nixGL
+if [[ $1 == "-u" ]]; then
+    git pull
+    exit    # inspect any changes
+fi
+
+nix-env --file ./ --install --attr nixGLNvidia
