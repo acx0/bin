@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+set -e
+
+# notes:
+#   - arg: <empty>|<ipv4-addr>|<ipv6-addr>|<domain-name>
+#   - empty query returns results for source IP
+#   - order of fields returned matches ordering in `Returned data` table,
+#     not order supplied: https://ip-api.com/docs/api:newline_separated
+
+query="$1"
+query_fields="status,message,country,regionName,as,asname,mobile,proxy,hosting,query"
+response_fields="${query_fields/message,/}"
+failed_query_fields="status,message,query"
+output_fields="$response_fields"
+headers_file="/dev/shm/ip-api-headers"
+
+# see: https://ip-api.com/docs/api:newline_separated -> `Usage limits`
+check_usage_limit() {
+    if [[ ! -f $headers_file ]]; then
+        return
+    fi
+
+    requests_remaining=$(grep '^X-Rl:' $headers_file | awk '{print $2}' | tr -d '\r')
+    limit_window_end_s=$(grep '^X-Ttl:' $headers_file | awk '{print $2}' | tr -d '\r')
+    file_timestamp_s=$(stat --format '%Z' $headers_file)
+    now_timestamp_s=$(date +%s)
+    wait_s=$(($file_timestamp_s + $limit_window_end_s - $now_timestamp_s))
+
+    if (( $requests_remaining == 0 )) && (( $wait_s > 0 )); then
+        echo >&2 "warning: usage exceeded, $wait_s seconds remaining until window reset"
+        echo >&2 -n "sleeping..."
+        sleep "$wait_s"
+        echo >&2 -e "done\n"
+    fi
+}
+
+# note: curl suppresses IO error messages with `--silent`
+if [[ ! -d $(dirname "$headers_file") ]]; then
+    echo >&2 "error: parent dir of 'headers_file' output path doesn't exist or path isn't writeable"
+    exit 1
+fi
+
+check_usage_limit
+response=$(curl \
+    --silent \
+    --max-time 10 \
+    --dump-header "${headers_file}" \
+    "http://ip-api.com/line/${query}?fields=${query_fields}")
+if [[ $(head -n1 <<< "$response") != "success" ]]; then
+    output_fields="$failed_query_fields"
+fi
+
+paste <(tr ',' '\n' <<< $output_fields) <(echo "$response") \
+    | column --table --separator $'\t'
