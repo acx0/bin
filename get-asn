@@ -51,4 +51,4 @@ if [[ $(head -n1 <<< "$response") != "success" ]]; then
 fi
 
 paste <(tr ',' '\n' <<< $output_fields) <(echo "$response") \
-    | column --table --separator $'\t'
+    | column -ts $'\t'
