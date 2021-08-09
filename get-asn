@@ -13,6 +13,9 @@ response_fields="${query_fields/message,/}"
 failed_query_fields="status,message,query"
 output_fields="$response_fields"
 headers_file="/dev/shm/ip-api-headers"
+if [[ $OSTYPE == "darwin"* ]]; then
+    headers_file="/tmp/ip-api-headers"
+fi
 
 # see: https://ip-api.com/docs/api:newline_separated -> `Usage limits`
 check_usage_limit() {
@@ -20,9 +23,14 @@ check_usage_limit() {
         return
     fi
 
+    if [[ -z $(<$headers_file) ]]; then
+        echo >&2 "warning: '$headers_file' is empty, skipping rate limit check"
+        return
+    fi
+
     requests_remaining=$(grep '^X-Rl:' $headers_file | awk '{print $2}' | tr -d '\r')
     limit_window_end_s=$(grep '^X-Ttl:' $headers_file | awk '{print $2}' | tr -d '\r')
-    file_timestamp_s=$(stat --format '%Z' $headers_file)
+    file_timestamp_s=$(stat -f '%Z' $headers_file)
     now_timestamp_s=$(date +%s)
     wait_s=$(($file_timestamp_s + $limit_window_end_s - $now_timestamp_s))
 
