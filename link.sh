@@ -1,1 +1,3 @@
-/home/sam/etc/link.sh/link.sh
+#!/usr/bin/env bash
+
+$HOME/etc/link.sh/link.sh "$@"

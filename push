@@ -1,1 +1,3 @@
-/home/sam/src/sync/push
+#!/usr/bin/env bash
+
+$HOME/src/sync/push "$@"

@@ -1,1 +1,3 @@
-/home/sam/src/sync/pull
+#!/usr/bin/env bash
+
+$HOME/src/sync/pull "$@"

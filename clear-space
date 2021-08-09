@@ -1,1 +1,3 @@
-/home/sam/src/clear-space/clear-space
+#!/usr/bin/env bash
+
+$HOME/src/clear-space/clear-space "$@"
