@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+if [[ $OSTYPE != "darwin"* ]]; then
+    echo >&2 "unsupported: darwin only"
+    exit 1
+fi
+
+if pgrep com.docker.backend >/dev/null; then
+    exit
+fi
+
+open -a Docker
+while ! docker info &>/dev/null; do
+    printf '.'
+    sleep 1
+done && echo
