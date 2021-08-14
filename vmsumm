@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+if [[ $OSTYPE != "darwin"* ]]; then
+    echo >&2 "unsupported: darwin only"
+    exit 1
+fi
+
+if [[ -z $1 ]]; then
+    echo >&2 "usage: $(basename $0) <pid>|<partial-executable-name>"
+    exit 1
+fi
+
+output=$(sudo vmmap "$1")
+grep -e Process -e Path -e 'Physical footprint' <<< $output
+grep -A2 Summary <<< $output
