@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# https://www.kernel.org/doc/html/latest/admin-guide/sysctl/vm.html
+
+sync
+sudo sysctl vm.drop_caches=3
