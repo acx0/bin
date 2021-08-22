@@ -30,7 +30,12 @@ check_usage_limit() {
 
     requests_remaining=$(grep '^X-Rl:' $headers_file | awk '{print $2}' | tr -d '\r')
     limit_window_end_s=$(grep '^X-Ttl:' $headers_file | awk '{print $2}' | tr -d '\r')
-    file_timestamp_s=$(stat -f '%Z' $headers_file)
+    if [[ $OSTYPE == "darwin"* ]]; then
+        file_timestamp_s=$(stat -f '%Z' $headers_file)
+    else
+        # GNU coreutils stat `-f` != `--format`...
+        file_timestamp_s=$(stat --format '%Z' $headers_file)
+    fi
     now_timestamp_s=$(date +%s)
     wait_s=$(($file_timestamp_s + $limit_window_end_s - $now_timestamp_s))
 
