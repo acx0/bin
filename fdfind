@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+fd_bin=fdfind
+if [[ $OSTYPE == "darwin"* ]]; then
+    fd_bin=/usr/local/bin/fd
+fi
+$fd_bin "$@"
