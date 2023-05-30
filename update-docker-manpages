@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# docker desktop doesn't install man pages; install them manually
+# from: https://github.com/docker/for-mac/issues/743#issuecomment-928969594
+
+set -e
+
+# note: add this location to $MANPATH, e.g.:
+#   export MANPATH="${MANPATH:+${MANPATH}:}$HOME/var/docker-cli/man"
+install_dir="$HOME/var"
+repo_dir="docker-cli"
+
+if [[ $OSTYPE != "darwin"* ]]; then
+    echo >&2 "unsupported: darwin only"
+    exit 1
+fi
+
+if ! docker info &>/dev/null; then
+    echo >&2 "error: docker must be running"
+    exit 1
+fi
+
+installed_version="v$(docker version -f '{{.Client.Version}}')"
+
+mkdir -p "$install_dir"
+cd "$install_dir"
+if [[ -d $repo_dir ]]; then
+    cd "$repo_dir"
+    repo_version=$(git tag)
+    cd ..
+
+    if [[ $installed_version != $repo_version ]]; then
+        backup_dir=$(mktemp -u /tmp/docker-cli.bak-XXXXX)
+        mkdir -p "$backup_dir"
+        mv -v "$repo_dir" "$backup_dir"
+    else
+        echo "already up to date"
+        exit
+    fi
+fi
+
+git clone --depth 1 --branch "$installed_version" https://github.com/docker/cli "$repo_dir"
+cd "$repo_dir"
+make -f docker.Makefile manpages
