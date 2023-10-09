@@ -37,7 +37,7 @@ EOF
     exit 1
 fi
 
-if [[ -z $(tmux list-sessions 2> /dev/null | grep "$SESSION") ]]; then
+if [[ -z $(tmux list-sessions 2> /dev/null | grep "^${SESSION}:") ]]; then
     tmux new-session -s $SESSION "$CMD"
 else
     tmux attach-session $OPTS -t $SESSION
