@@ -1,8 +1,12 @@
 #!/bin/bash
 
 if ! mountpoint -q /media/data; then
-    echo 2>&1 "data not mounted"
+    echo >&2 "data not mounted"
     exit 1
 fi
 
-sudo umount /media/data && sudo cryptdisks_stop data
+if [[ -L /dev/mapper/vg_deb-lv_data ]]; then
+    sudo umount /media/data
+else
+    sudo umount /media/data && sudo cryptdisks_stop data
+fi

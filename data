@@ -1,8 +1,12 @@
 #!/bin/bash
 
 if mountpoint -q /media/data; then
-    echo 2>&1 "data already mounted"
+    echo >&2 "data already mounted"
     exit 1
 fi
 
-sudo cryptdisks_start data && sudo mount /media/data
+if [[ -L /dev/mapper/vg_deb-lv_data ]]; then
+    sudo mount /media/data
+else
+    sudo cryptdisks_start data && sudo mount /media/data
+fi
