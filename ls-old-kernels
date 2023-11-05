@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# list installed kernel packages where corresponding header package is no longer installed/available
+# e.g.:
+#   sudo aptitude purge $(ls-old-kernels)
+
+declare -A installed_headers
+
+for header_pkg in $(aptitude search -F '%p' '~i ~M linux-headers.*amd64'); do
+    version=$(sed -E 's/linux-headers-(.*)-amd64/\1/' <<<$header_pkg)
+    installed_headers["$version"]=1
+done
+
+if (( ${#installed_headers[@]} == 0 )); then
+    echo >&2 "no installed header packages"
+    exit 1
+fi
+
+for image_pkg in $(aptitude search -F '%p' '~i ~M linux-image.*amd64'); do
+    version=$(sed -E 's/linux-image-(.*)-amd64/\1/' <<<$image_pkg)
+    if [[ ! -v installed_headers["$version"] ]]; then
+        echo $image_pkg
+    fi
+done
