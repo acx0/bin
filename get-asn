@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -e
 
-# notes:
-#   - arg: <empty>|<ipv4-addr>|<ipv6-addr>|<domain-name>
-#   - empty query returns results for source IP
-#   - order of fields returned matches ordering in `Returned data` table,
+# Notes:
+#   - Arg: <empty>|<ipv4-addr>|<ipv6-addr>|<domain-name>
+#   - Empty query returns results for source IP
+#   - Order of fields returned matches ordering in `Returned data` table,
 #     not order supplied: https://ip-api.com/docs/api:newline_separated
 
 query="$1"
@@ -17,7 +17,7 @@ if [[ $OSTYPE == "darwin"* ]]; then
     headers_file="/tmp/ip-api-headers"
 fi
 
-# see: https://ip-api.com/docs/api:newline_separated -> `Usage limits`
+# See: https://ip-api.com/docs/api:newline_separated -> `Usage limits`
 check_usage_limit() {
     if [[ ! -f $headers_file ]]; then
         return
@@ -47,7 +47,7 @@ check_usage_limit() {
     fi
 }
 
-# note: curl suppresses IO error messages with `--silent`
+# Note: curl suppresses IO error messages with `--silent`
 if [[ ! -d $(dirname "$headers_file") ]]; then
     echo >&2 "error: parent dir of 'headers_file' output path doesn't exist or path isn't writeable"
     exit 1
