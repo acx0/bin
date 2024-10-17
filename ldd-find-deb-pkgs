@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # find which debian packages provide a given binary's dynamic dependencies
-# note: see `man ldd` -> `/Security` disclaimer
+# note: see `LESS='+/Security' man ldd` disclaimer
 
 bin="$1"
 if [[ -z $bin ]]; then
