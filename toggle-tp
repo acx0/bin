@@ -5,7 +5,7 @@ if ! command -v xinput >/dev/null; then
     exit 1
 fi
 
-tp_id=$(xinput --list --long | grep -io "synaptics touchpad\s\+id=[0-9]\+" | cut -d= -f2)
+tp_id=$(xinput --list --long | grep -io "touchpad\s\+id=[0-9]\+" | cut -d= -f2)
 if xinput --list-props "$tp_id" | grep -i "device enabled.*:.*1" >/dev/null; then
     xinput --disable "$tp_id"
 
